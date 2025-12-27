@@ -17,7 +17,6 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Essential for full-screen mobile experience */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -147,9 +146,8 @@
 
         #resultSection { display: none; }
         
-        /* Padding added for cleaner screenshot capture */
         #captureArea {
-            padding: 10px;
+            padding: 15px;
             background: var(--card-bg);
             border-radius: 20px;
         }
@@ -185,6 +183,17 @@
         }
 
         .label-sm { font-size: 0.9rem; color: var(--text-dim); }
+
+        /* Hidden by default, visible in saved photo */
+        #photoTimestamp {
+            display: none;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+        }
 
         @media (max-height: 600px) {
             body { align-items: flex-start; }
@@ -276,6 +285,8 @@
                 <span style="font-size: 0.8rem; opacity: 0.8; font-weight: 600;">စုစုပေါင်းကျသင့်ငွေ</span>
                 <span class="val-lg" id="resTotal"></span>
             </div>
+            
+            <div id="photoTimestamp"></div>
         </div>
 
         <button class="btn-save" onclick="captureResult()">
@@ -334,20 +345,36 @@
 
     function captureResult() {
         const captureArea = document.getElementById('captureArea');
+        const stamp = document.getElementById('photoTimestamp');
         
-        // Hide button temporarily for clean shot if needed (not needed here as btn is outside captureArea)
+        // 1. Create timestamp string
+        const now = new Date();
+        const options = { 
+            year: 'numeric', month: 'short', day: 'numeric', 
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: true 
+        };
+        const dateTimeStr = now.toLocaleString('en-US', options);
+        
+        // 2. Show timestamp inside the capture area
+        stamp.innerText = `ထုတ်ယူသည့်အချိန် - ${dateTimeStr}`;
+        stamp.style.display = 'block';
+
+        // 3. Capture
         html2canvas(captureArea, {
-            backgroundColor: "#1c1f26", // Matches your card-bg
-            scale: 2, // Higher quality
+            backgroundColor: "#1c1f26",
+            scale: 2,
             logging: false,
             useCORS: true
         }).then(canvas => {
             const image = canvas.toDataURL("image/png");
             const link = document.createElement('a');
-            const timestamp = new Date().getTime();
-            link.download = `GoldCalc_${timestamp}.png`;
+            link.download = `Gold_Calculation_${now.getTime()}.png`;
             link.href = image;
             link.click();
+            
+            // 4. Hide timestamp again after capture
+            stamp.style.display = 'none';
         });
     }
 </script>
