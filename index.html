@@ -2,8 +2,9 @@
 <html lang="my">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Modern Gold Calculator MM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --gold-gradient: linear-gradient(135deg, #fcc103 0%, #d4a017 100%);
@@ -16,33 +17,42 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Essential for full-screen mobile experience */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: 'Pyidaungsu', -apple-system, BlinkMacSystemFont, sans-serif;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding-top: calc(20px + env(safe-area-inset-top));
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            padding-left: calc(15px + env(safe-area-inset-left));
+            padding-right: calc(15px + env(safe-area-inset-right));
+            overflow-x: hidden;
         }
 
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 450px;
             background: var(--card-bg);
-            padding: 30px;
-            border-radius: 24px;
+            padding: 24px;
+            border-radius: 28px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             position: relative;
-            overflow: hidden;
         }
 
         h2 { 
             color: var(--accent-gold); 
-            font-size: 1.1rem; 
-            margin: 25px 0 15px 0; 
+            font-size: 1rem; 
+            margin: 20px 0 12px 0; 
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -52,43 +62,39 @@
         h2::before {
             content: '';
             width: 4px;
-            height: 18px;
+            height: 16px;
             background: var(--gold-gradient);
             border-radius: 10px;
         }
 
-        h2:first-of-type { margin-top: 0; }
-
-        .input-group { margin-bottom: 15px; }
-        
         .unit-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 12px;
         }
 
         .unit-field { position: relative; }
         
         .unit-label {
             position: absolute;
-            right: 12px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-dim);
             pointer-events: none;
         }
 
         input {
             width: 100%;
-            padding: 14px 12px;
-            box-sizing: border-box;
+            padding: 16px 12px;
             background: var(--input-bg);
             border: 1.5px solid transparent;
             color: white;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 1rem;
+            appearance: none;
             transition: var(--transition);
         }
 
@@ -96,87 +102,94 @@
             border-color: var(--accent-gold);
             outline: none;
             background: #2d323d;
-            box-shadow: 0 0 15px rgba(252, 193, 3, 0.1);
         }
 
         .btn-primary {
             width: 100%;
-            padding: 16px;
+            padding: 18px;
             background: var(--gold-gradient);
             border: none;
-            border-radius: 14px;
-            font-weight: 600;
+            border-radius: 16px;
+            font-weight: 700;
             font-size: 1.1rem;
             cursor: pointer;
             margin-top: 20px;
-            color: #222;
+            color: #111;
             transition: var(--transition);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(252, 193, 3, 0.3);
         }
 
         .btn-reset {
             width: 100%;
-            padding: 12px;
-            background: transparent;
+            padding: 14px;
+            background: rgba(255,255,255,0.05);
             border: 1px solid #444;
             color: var(--text-dim);
-            border-radius: 12px;
-            margin-top: 10px;
+            border-radius: 14px;
+            margin-top: 12px;
             cursor: pointer;
-            transition: var(--transition);
         }
 
-        #resultSection { 
-            display: none; 
-            animation: slideUp 0.4s ease-out;
+        .btn-save {
+            width: 100%;
+            padding: 14px;
+            background: #2e7d32;
+            border: none;
+            color: white;
+            border-radius: 14px;
+            margin-top: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        #resultSection { display: none; }
         
+        /* Padding added for cleaner screenshot capture */
+        #captureArea {
+            padding: 10px;
+            background: var(--card-bg);
+            border-radius: 20px;
+        }
+
         .result-card {
             background: rgba(255,255,255,0.03);
-            padding: 18px;
-            border-radius: 16px;
-            margin-bottom: 12px;
+            padding: 16px;
+            border-radius: 18px;
+            margin-bottom: 10px;
             border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* ပေါက်ဈေးအတွက် သီးသန့် Style */
-        .price-highlight {
-            border-left: 3px solid var(--accent-gold);
-            background: rgba(252, 193, 3, 0.05);
         }
 
         .result-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            padding: 4px 0;
         }
 
-        .label-sm { font-size: 0.85rem; color: var(--text-dim); }
-        .val-lg { font-size: 1rem; color: var(--accent-gold); font-weight: 500; }
-        
         .total-box {
             background: var(--gold-gradient);
             color: #000;
-            padding: 24px;
+            padding: 20px;
             text-align: center;
-            border-radius: 18px;
+            border-radius: 20px;
             margin: 20px 0;
-            box-shadow: 0 10px 25px rgba(252, 193, 3, 0.2);
         }
 
-        .total-box .label-sm { color: rgba(0,0,0,0.6); font-weight: 600; }
-        .total-box .val-lg { color: #000; font-size: 1.6rem; font-weight: 800; display: block; margin-top: 5px;}
+        .total-box .val-lg {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: block;
+        }
 
+        .label-sm { font-size: 0.9rem; color: var(--text-dim); }
+
+        @media (max-height: 600px) {
+            body { align-items: flex-start; }
+            .container { margin-top: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -186,84 +199,91 @@
         <h2 style="margin-top: 0;">ရွှေဈေး (ပေါက်ဈေး)</h2>
         <div class="input-group">
             <div class="unit-field">
-                <input type="number" id="marketPrice" placeholder="၀">
+                <input type="number" id="marketPrice" pattern="\d*" inputmode="decimal" placeholder="၀">
                 <span class="unit-label">ကျပ်</span>
             </div>
         </div>
 
         <h2>ရွှေအလေးချိန်</h2>
         <div class="unit-row">
-            <div class="unit-field"><input type="number" id="wk" placeholder="၀" oninput="autoConvert('wk','wp','wy')"><span class="unit-label">ကျပ်</span></div>
-            <div class="unit-field"><input type="number" id="wp" placeholder="၀" oninput="autoConvert('wk','wp','wy')"><span class="unit-label">ပဲ</span></div>
-            <div class="unit-field"><input type="number" id="wy" placeholder="၀" oninput="autoConvert('wk','wp','wy')"><span class="unit-label">ရွေး</span></div>
+            <div class="unit-field"><input type="number" id="wk" inputmode="decimal" placeholder="၀" oninput="autoConvert('wk','wp','wy')"><span class="unit-label">ကျပ်</span></div>
+            <div class="unit-field"><input type="number" id="wp" inputmode="decimal" placeholder="၀" oninput="autoConvert('wk','wp','wy')"><span class="unit-label">ပဲ</span></div>
+            <div class="unit-field"><input type="number" id="wy" inputmode="decimal" placeholder="၀" oninput="autoConvert('wk','wp','wy')"><span class="unit-label">ရွေး</span></div>
         </div>
 
         <h2>အလျော့တွက်</h2>
         <div class="unit-row">
-            <div class="unit-field"><input type="number" id="rk" placeholder="၀" oninput="autoConvert('rk','rp','ry')"><span class="unit-label">ကျပ်</span></div>
-            <div class="unit-field"><input type="number" id="rp" placeholder="၀" oninput="autoConvert('rk','rp','ry')"><span class="unit-label">ပဲ</span></div>
-            <div class="unit-field"><input type="number" id="ry" placeholder="၀" oninput="autoConvert('rk','rp','ry')"><span class="unit-label">ရွေး</span></div>
+            <div class="unit-field"><input type="number" id="rk" inputmode="decimal" placeholder="၀" oninput="autoConvert('rk','rp','ry')"><span class="unit-label">ကျပ်</span></div>
+            <div class="unit-field"><input type="number" id="rp" inputmode="decimal" placeholder="၀" oninput="autoConvert('rk','rp','ry')"><span class="unit-label">ပဲ</span></div>
+            <div class="unit-field"><input type="number" id="ry" inputmode="decimal" placeholder="၀" oninput="autoConvert('rk','rp','ry')"><span class="unit-label">ရွေး</span></div>
         </div>
 
-        <h2>အခြားကုန်ကျစရိတ်</h2>
+        <h2>အခြားစရိတ်</h2>
         <div class="unit-row">
             <div class="unit-field" style="grid-column: span 1.5;">
-                <input type="number" id="smithFee" placeholder="လက်ခ">
+                <input type="number" id="smithFee" inputmode="decimal" placeholder="လက်ခ">
             </div>
             <div class="unit-field" style="grid-column: span 1.5;">
-                <input type="number" id="stonePrice" placeholder="ကျောက်ဖိုး">
+                <input type="number" id="stonePrice" inputmode="decimal" placeholder="ကျောက်ဖိုး">
             </div>
         </div>
 
         <button class="btn-primary" onclick="showResults()">တွက်ချက်မည်</button>
-        <button class="btn-reset" onclick="clearInputs()">အချက်အလက်များဖျက်ရန်</button>
+        <button class="btn-reset" onclick="clearInputs()">အချက်အလက်ဖျက်ရန်</button>
     </div>
 
     <div id="resultSection">
-        <h2 style="margin-top: 0;">ကျသင့်ငွေ ရှင်းတမ်း</h2>
-        
-        <div class="result-card price-highlight">
-            <div class="result-row">
-                <span class="label-sm">လက်ရှိရွှေပေါက်ဈေး</span>
-                <span class="val-lg" id="resMP" style="font-weight: 700;"></span>
+        <div id="captureArea">
+            <h2 style="margin-top: 0;">ရှင်းတမ်း</h2>
+            
+            <div class="result-card" style="border-left: 4px solid var(--accent-gold);">
+                <div class="result-row">
+                    <span class="label-sm">ပေါက်ဈေး</span>
+                    <span class="val-lg" id="resMP" style="font-weight: 700; color: var(--accent-gold);"></span>
+                </div>
             </div>
+
+            <div class="result-card">
+                <div class="result-row">
+                    <span class="label-sm">အလေးချိန်</span>
+                    <span id="resW"></span>
+                </div>
+                <div class="result-row" style="margin-top: 8px; border-top: 1px solid #333; padding-top: 8px;">
+                    <span class="label-sm">ရွှေဖိုး</span>
+                    <span class="val-lg" id="resWV"></span>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-row">
+                    <span class="label-sm">အလျော့တွက်</span>
+                    <span id="resR"></span>
+                </div>
+                <div class="result-row" style="margin-top: 8px; border-top: 1px solid #333; padding-top: 8px;">
+                    <span class="label-sm">တန်ဖိုး</span>
+                    <span class="val-lg" id="resRV"></span>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-row">
+                    <span class="label-sm">လက်ခ/ကျောက်</span>
+                    <span id="resFees"></span>
+                </div>
+            </div>
+
+            <div class="total-box">
+                <span style="font-size: 0.8rem; opacity: 0.8; font-weight: 600;">စုစုပေါင်းကျသင့်ငွေ</span>
+                <span class="val-lg" id="resTotal"></span>
+            </div>
+            <p style="text-align: center; font-size: 0.7rem; color: var(--text-dim); margin: 0;">Gold Calculator MM</p>
         </div>
 
-        <div class="result-card">
-            <div class="result-row">
-                <span class="label-sm">ရွှေအလေးချိန်</span>
-                <span class="val-lg" id="resW"></span>
-            </div>
-            <div class="result-row" style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 8px; padding-top: 12px;">
-                <span class="label-sm">ရွှေတန်ဖိုးသီးသန့်</span>
-                <span class="val-lg" id="resWV"></span>
-            </div>
-        </div>
+        <button class="btn-save" onclick="captureResult()">
+            📸 ဓာတ်ပုံသိမ်းဆည်းမည်
+        </button>
 
-        <div class="result-card">
-            <div class="result-row">
-                <span class="label-sm">အလျော့တွက်</span>
-                <span class="val-lg" id="resR"></span>
-            </div>
-            <div class="result-row" style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 8px; padding-top: 12px;">
-                <span class="label-sm">အလျော့တွက်တန်ဖိုး</span>
-                <span class="val-lg" id="resRV"></span>
-            </div>
-        </div>
-
-        <div class="result-card">
-            <div class="result-row">
-                <span class="label-sm">လက်ခ / ကျောက်ဖိုး</span>
-                <span class="val-lg" id="resFees"></span>
-            </div>
-        </div>
-
-        <div class="total-box">
-            <span class="label-sm">စုစုပေါင်းကျသင့်ငွေ</span>
-            <span class="val-lg" id="resTotal"></span>
-        </div>
-
-        <button class="btn-reset" onclick="backToInput()" style="width: 100%; border: none; background: #333; color: white;">နောက်သို့ပြန်သွားရန်</button>
+        <button class="btn-reset" onclick="backToInput()" style="background: #333; color: white; border: none;">နောက်သို့</button>
     </div>
 </div>
 
@@ -295,9 +315,7 @@
         const redVal = reduction * price;
         const total = goldVal + redVal + fees;
 
-        // ပေါက်ဈေးကို Result တွင်ပြရန်
         document.getElementById('resMP').innerText = `${price.toLocaleString()} ကျပ်`;
-        
         document.getElementById('resW').innerText = `${getV('wk')} ကျပ် ${getV('wp')} ပဲ ${getV('wy')} ရွေး`;
         document.getElementById('resWV').innerText = `${Math.round(goldVal).toLocaleString()} ကျပ်`;
         document.getElementById('resR').innerText = `${getV('rk')} ကျပ် ${getV('rp')} ပဲ ${getV('ry')} ရွေး`;
@@ -307,11 +325,31 @@
 
         document.getElementById('inputSection').style.display = 'none';
         document.getElementById('resultSection').style.display = 'block';
+        window.scrollTo(0,0);
     }
 
     function backToInput() {
         document.getElementById('inputSection').style.display = 'block';
         document.getElementById('resultSection').style.display = 'none';
+    }
+
+    function captureResult() {
+        const captureArea = document.getElementById('captureArea');
+        
+        // Hide button temporarily for clean shot if needed (not needed here as btn is outside captureArea)
+        html2canvas(captureArea, {
+            backgroundColor: "#1c1f26", // Matches your card-bg
+            scale: 2, // Higher quality
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            const image = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            const timestamp = new Date().getTime();
+            link.download = `GoldCalc_${timestamp}.png`;
+            link.href = image;
+            link.click();
+        });
     }
 </script>
 
